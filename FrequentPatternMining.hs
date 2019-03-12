@@ -2,10 +2,6 @@ module FrequentPatternMining where
 
 import qualified Data.Set as Set
 import Data.List
---data Item        = Item String            deriving (Eq, Ord, Show)
---data Itemset     = Itemset (Set.Set Item) deriving (Eq, Ord, Show)
---data Transaction = Transaction Itemset    deriving (Eq, Ord, Show)
---data Database    = Database [Transaction] deriving (Show)
 
 --------------- Types -------------
 type Item = String
@@ -82,49 +78,3 @@ ruleFrequency rule database = frequency (ruleUnion rule) database
 
 confidence :: Rule -> Database -> Float
 confidence rule database = (ruleSupport rule database) `toRealDiv` (support (antecedent rule) database)
-
-main = do
-    let butter = "butter"
-    let milk = "milk"
-    let bread = "bread"
-    let sugar = "sugar"
-    let flour = "flour"
-    let eggs = "eggs"
-    let salt = "salt"
-
-    putStrLn butter
-    putStrLn bread
-    putStrLn sugar
-
-    let t1 = Set.fromList [bread, butter, milk, sugar]
-    let t2 = Set.fromList [butter, flour, milk, sugar]
-    let t3 = Set.fromList [butter, eggs, milk, salt]
-    let t4 = Set.fromList [eggs]
-    let t5 = Set.fromList [butter, flour, milk, salt, sugar]
-    printSet t1
-
-    let db = [t1, t2, t3, t4, t5]
-
-    printDatabase db
-
-    let test = Set.fromList [milk, sugar, butter]
-
-    printSetOfSets $ cover test db
-    print $ support test db
-    print $ frequency test db
-
-    print $ isFrequent test db 3
-    printSetOfSets $ powerSet $ Set.fromList [1, 2, 3, 4]
-
-    let ant = Set.fromList [butter, milk]
-    let cons = Set.fromList [salt]
-    let rule = Rule ant cons
-    print rule
-
-    print $ ruleSupport rule db
-    print $ ruleFrequency rule db
-    print $ confidence rule db
-
-    let items = extractItems db
-    printSet items
-    printSetOfSets $ powerSet items
