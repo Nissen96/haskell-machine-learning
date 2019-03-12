@@ -2,6 +2,7 @@ module FrequentPatternMining where
 
 import qualified Data.Set as Set
 import Data.List
+import Data.Maybe (catMaybes)
 
 --------------- Types -------------
 type Item = String
@@ -42,6 +43,12 @@ printDatabase db = putStrLn $ "DB = " ++ showListOfSets db
 toRealDiv :: (Integral a, Fractional b) => a -> a -> b
 toRealDiv a b = fromIntegral a / fromIntegral b
 
+cartesian :: [a] -> [a] -> [(a, a)]
+cartesian a b = [(x, y) | x <- a, y <- b]
+
+cartesianNonreflexive :: Eq a => [a] -> [a] -> [(a, a)]
+cartesianNonreflexive a b = [(x, y) | x <- a, y <- b, x /= y]
+
 powerSet :: Ord a => Set.Set a -> Set.Set (Set.Set a)
 powerSet set
     | null set = Set.singleton Set.empty
@@ -49,6 +56,8 @@ powerSet set
         where
             (x, xs) = Set.deleteFindMin set
             powset = powerSet xs
+
+
 
 ---------------- Itemsets ----------------
 cover :: Itemset -> Database -> Set.Set Transaction
@@ -78,3 +87,19 @@ ruleFrequency rule database = frequency (ruleUnion rule) database
 
 confidence :: Rule -> Database -> Float
 confidence rule database = (ruleSupport rule database) `toRealDiv` (support (antecedent rule) database)
+
+
+-------------------- Apriori ------------------
+
+
+generateCandidates :: Set.Set Itemset -> Set.Set Itemset
+generateCandidates freqSets = Set.fromList $ catMaybes $ map (\(x, y) -> join x y) $ cartesianNonreflexive sorted sorted
+    where sorted = map (sort . Set.toList) $ Set.toList freqSets
+
+join :: [Item] -> [Item] -> Maybe Itemset
+join p q
+    | preP == preQ = Just $ (Set.fromList p) `Set.union` (Set.fromList q)
+    | otherwise    = Nothing
+    where
+        preP = take (length p - 1) p
+        preQ = take (length q - 1) q

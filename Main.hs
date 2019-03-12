@@ -46,3 +46,18 @@ main = do
     let items = extractItems db
     printSet items
     printSetOfSets $ powerSet items
+
+    let i1 = "1"
+    let i2 = "2"
+    let i3 = "3"
+    let i4 = "4"
+    let i5 = "5"
+
+    let s1 = Set.fromList [i1, i2, i3]
+    let s2 = Set.fromList [i1, i2, i4]
+    let s3 = Set.fromList [i1, i3, i4]
+    let s4 = Set.fromList [i1, i3, i5]
+    let s5 = Set.fromList [i2, i3, i4]
+
+    let freqSets = Set.fromList [s1, s2, s3, s4, s5]
+    printSetOfSets $ generateCandidates freqSets
