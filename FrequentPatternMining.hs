@@ -1,6 +1,9 @@
+{-# LANGUAGE MonadComprehensions #-}
+
 module FrequentPatternMining where
 
-import qualified Data.Set as Set
+import Data.Set.Monad (Set)
+import qualified Data.Set.Monad as Set
 import Data.List
 import Data.Maybe (catMaybes)
 
@@ -10,7 +13,7 @@ newtype Item a = Item a deriving (Eq, Ord)
 instance Show a => Show (Item a) where
     show (Item a) = show a
 
-type Itemset a = Set.Set (Item a)
+type Itemset a = Set (Item a)
 type Transaction a = Itemset a
 type Database a = [Transaction a]
 
@@ -19,48 +22,55 @@ data Rule a = Rule {
     consequent :: Itemset a
 } deriving (Eq, Ord)
 
-instance Show a => Show (Rule a) where
+instance (Ord a, Show a) => Show (Rule a) where
     show (Rule x y) = showSet x ++ " => " ++ showSet y
 
 
 ----------- Helpers ---------------
-showSet :: Show a => Set.Set a -> String
+showSet :: (Ord a, Show a) => Set a -> String
 showSet set = "{" ++ (intercalate ", " . map show . Set.toList) set ++ "}"
 
-showListOfSets :: Show a => [Set.Set a] -> String
+showListOfSets :: (Ord a, Show a) => [Set a] -> String
 showListOfSets ls = "[\n  " ++ (intercalate ",\n  " . map showSet) ls ++ "\n]"
 
-showSetOfSets :: Show a => Set.Set (Set.Set a) -> String
+showSetOfSets :: (Ord a, Show a) => Set (Set a) -> String
 showSetOfSets set = "{\n  " ++ (intercalate ",\n  " . map showSet . Set.toList) set ++ "\n}"
 
-printSet :: Show a => Set.Set a -> IO ()
+printSet :: (Ord a, Show a) => Set a -> IO ()
 printSet set = putStrLn $ showSet set
 
-printListOfSets :: Show a => [Set.Set a] -> IO ()
+printListOfSets :: (Ord a, Show a) => [Set a] -> IO ()
 printListOfSets ls = putStrLn $ showListOfSets ls
 
-printSetOfSets :: Show a => Set.Set (Set.Set a) -> IO ()
+printSetOfSets :: (Ord a, Show a) => Set (Set a) -> IO ()
 printSetOfSets set = putStrLn $ showSetOfSets set
 
-printDatabase :: Show a => Database a -> IO ()
+printDatabase :: (Ord a, Show a) => Database a -> IO ()
 printDatabase db = putStrLn $ "DB = " ++ showListOfSets db
 
 toRealDiv :: (Integral a, Fractional b) => a -> a -> b
 toRealDiv a b = fromIntegral a / fromIntegral b
 
-cartesian :: [a] -> [a] -> [(a, a)]
+cartesian :: Set a -> Set a -> Set (a, a)
 cartesian a b = [(x, y) | x <- a, y <- b]
 
-cartesianNonreflexive :: Eq a => [a] -> [a] -> [(a, a)]
+cartesianNonreflexive :: Eq a => Set a -> Set a -> Set (a, a)
 cartesianNonreflexive a b = [(x, y) | x <- a, y <- b, x /= y]
 
-powerSet :: Ord a => Set.Set a -> Set.Set (Set.Set a)
+powerSet :: Ord a => Set a -> Set (Set a)
 powerSet set
     | null set = Set.singleton Set.empty
     | otherwise = Set.map (Set.insert x) powset `Set.union` powset
         where
             (x, xs) = Set.deleteFindMin set
             powset = powerSet xs
+
+setTake :: Ord a => Int -> Set a -> Set a
+setTake n = Set.fromDistinctAscList . take n . Set.toAscList
+
+
+setCatMaybes :: Ord a => Set (Maybe a) -> Set a
+setCatMaybes = Set.fromDistinctAscList . catMaybes . Set.toAscList
 
 
 ---------------- Itemsets ----------------
@@ -101,13 +111,13 @@ confidence rule database = (ruleSupport rule database) `toRealDiv` (support (ant
 
 
 generateCandidates :: Ord a => Set.Set (Itemset a) -> Set.Set (Itemset a)
-generateCandidates freqSets = Set.fromList $ catMaybes $ map (\(x, y) -> join x y) $ cartesianNonreflexive sorted sorted
-    where sorted = map (sort . Set.toList) $ Set.toList freqSets
+generateCandidates freqSets = setCatMaybes $ Set.map (\(x, y) -> join x y) $ cartesianNonreflexive freqSets freqSets
 
-join :: Ord a => [Item a] -> [Item a] -> Maybe (Itemset a)
+join :: Ord a => Set (Item a) -> Set (Item a) -> Maybe (Itemset a)
 join p q
-    | preP == preQ = Just $ (Set.fromList p) `Set.union` (Set.fromList q)
+    | preP == preQ = Just $ p `Set.union` q
     | otherwise    = Nothing
     where
-        preP = take (length p - 1) p
-        preQ = take (length q - 1) q
+        preP = setTake k p
+        preQ = setTake k q
+        k = Set.size p - 1

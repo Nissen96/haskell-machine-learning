@@ -1,5 +1,5 @@
 import FrequentPatternMining
-import qualified Data.Set as Set
+import qualified Data.Set.Monad as Set
 
 main = do
     let butter = "butter"
