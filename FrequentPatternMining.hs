@@ -15,7 +15,7 @@ instance Show a => Show (Item a) where
 
 type Itemset a = Set (Item a)
 type Transaction a = Itemset a
-type Database a = [Transaction a]
+type Database a = Set (Transaction a)
 
 data Rule a = Rule {
     antecedent :: Itemset a,
@@ -46,7 +46,7 @@ printSetOfSets :: (Ord a, Show a) => Set (Set a) -> IO ()
 printSetOfSets set = putStrLn $ showSetOfSets set
 
 printDatabase :: (Ord a, Show a) => Database a -> IO ()
-printDatabase db = putStrLn $ "DB = " ++ showListOfSets db
+printDatabase db = putStrLn $ "DB = " ++ showSetOfSets db
 
 toRealDiv :: (Integral a, Fractional b) => a -> a -> b
 toRealDiv a b = fromIntegral a / fromIntegral b
@@ -68,29 +68,30 @@ powerSet set
 setTake :: Ord a => Int -> Set a -> Set a
 setTake n = Set.fromDistinctAscList . take n . Set.toAscList
 
-
 setCatMaybes :: Ord a => Set (Maybe a) -> Set a
 setCatMaybes = Set.fromDistinctAscList . catMaybes . Set.toAscList
 
+setUnions :: Ord a => Set (Set a) -> Set a
+setUnions = Set.fold Set.union Set.empty
 
 ---------------- Itemsets ----------------
 createItemset :: Ord a => [a] -> Itemset a
 createItemset ls = Set.fromList [Item x | x <- ls]
 
-cover :: Ord a => Itemset a -> Database a -> Set.Set (Transaction a)
-cover itemset database = Set.fromList [trans | trans <- database, itemset `Set.isSubsetOf` trans]
+cover :: Ord a => Itemset a -> Database a -> Set (Transaction a)
+cover itemset database = [trans | trans <- database, itemset `Set.isSubsetOf` trans]
 
 support :: Ord a => Itemset a -> Database a -> Int
-support itemset database = length $ cover itemset database
+support itemset database = Set.size $ cover itemset database
 
 frequency :: Ord a => Itemset a -> Database a -> Float
-frequency itemset database = (support itemset database) `toRealDiv` (length database)
+frequency itemset database = (support itemset database) `toRealDiv` (Set.size database)
 
 isFrequent :: Ord a => Itemset a -> Database a -> Int -> Bool
 isFrequent itemset database threshold = (support itemset database) >= threshold
 
 extractItems :: Ord a => Database a -> Itemset a
-extractItems database = Set.unions database
+extractItems database = setUnions database
 
 
 ------------------ Rules ------------------
@@ -110,7 +111,7 @@ confidence rule database = (ruleSupport rule database) `toRealDiv` (support (ant
 -------------------- Apriori ------------------
 
 
-generateCandidates :: Ord a => Set.Set (Itemset a) -> Set.Set (Itemset a)
+generateCandidates :: Ord a => Set (Itemset a) -> Set (Itemset a)
 generateCandidates freqSets = setCatMaybes $ Set.map (\(x, y) -> join x y) $ cartesianNonreflexive freqSets freqSets
 
 join :: Ord a => Set (Item a) -> Set (Item a) -> Maybe (Itemset a)

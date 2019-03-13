@@ -21,7 +21,7 @@ main = do
     let t5 = createItemset [butter, flour, milk, salt, sugar]
     printSet t1
 
-    let db = [t1, t2, t3, t4, t5]
+    let db = Set.fromList [t1, t2, t3, t4, t5]
 
     printDatabase db
 
