@@ -13,9 +13,9 @@ newtype Item a = Item a deriving (Eq, Ord)
 instance Show a => Show (Item a) where
     show (Item a) = show a
 
-type Itemset a = Set (Item a)
+type Itemset a     = Set (Item a)
 type Transaction a = Itemset a
-type Database a = Set (Transaction a)
+type Database a    = Set (Transaction a)
 
 data Rule a = Rule {
     antecedent :: Itemset a,
@@ -59,11 +59,11 @@ cartesianNonreflexive a b = [(x, y) | x <- a, y <- b, x /= y]
 
 powerSet :: Ord a => Set a -> Set (Set a)
 powerSet set
-    | null set = Set.singleton Set.empty
+    | null set  = Set.singleton Set.empty
     | otherwise = Set.map (Set.insert x) powset `Set.union` powset
         where
             (x, xs) = Set.deleteFindMin set
-            powset = powerSet xs
+            powset  = powerSet xs
 
 setTake :: Ord a => Int -> Set a -> Set a
 setTake n = Set.fromDistinctAscList . take n . Set.toAscList
@@ -105,14 +105,18 @@ ruleFrequency :: Ord a => Rule a -> Database a -> Float
 ruleFrequency rule database = frequency (ruleUnion rule) database
 
 confidence :: Ord a => Rule a -> Database a -> Float
-confidence rule database = (ruleSupport rule database) `toRealDiv` (support (antecedent rule) database)
+confidence rule database = (ruleSupport rule database)
+                           `toRealDiv`
+                           (support (antecedent rule) database)
 
 
 -------------------- Apriori ------------------
 
 
 generateCandidates :: Ord a => Set (Itemset a) -> Set (Itemset a)
-generateCandidates freqSets = setCatMaybes $ Set.map (\(x, y) -> join x y) $ cartesianNonreflexive freqSets freqSets
+generateCandidates freqSets = setCatMaybes $
+                              Set.map (\(x, y) -> join x y) $
+                              cartesianNonreflexive freqSets freqSets
 
 join :: Ord a => Set (Item a) -> Set (Item a) -> Maybe (Itemset a)
 join p q
@@ -121,4 +125,4 @@ join p q
     where
         preP = setTake k p
         preQ = setTake k q
-        k = Set.size p - 1
+        k    = Set.size p - 1
