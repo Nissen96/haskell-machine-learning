@@ -2,8 +2,6 @@
 ## CUSTOM
 titlepage.pdf
 *.o
-CHANGELOG.md
-Setup.hs
 dist-newstyle/
 
 # Compiled class file
