@@ -4,7 +4,6 @@ titlepage.pdf
 *.o
 CHANGELOG.md
 Setup.hs
-*.cabal
 dist-newstyle/
 
 # Compiled class file
