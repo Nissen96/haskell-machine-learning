@@ -111,9 +111,9 @@ confidence rule database = (ruleSupport rule database)
 
 
 generateCandidates :: Ord a => Set (Itemset a) -> Set (Itemset a)
-generateCandidates freqSets = setCatMaybes $
-                              Set.map (\(x, y) -> join x y) $
-                              cartesianNonreflexive freqSets freqSets
+generateCandidates freqSets = setCatMaybes
+                            . Set.map (uncurry join)
+                            $ cartesianNonreflexive freqSets freqSets
 
 join :: Ord a => Set (Item a) -> Set (Item a) -> Maybe (Itemset a)
 join p q
