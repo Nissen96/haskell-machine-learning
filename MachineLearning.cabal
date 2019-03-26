@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 22172fb9fa1b9e5704b65c57cd725b52c89c604ea71ecbf487ecf0866ca47858
+-- hash: 4d3c285cf0c87db2d2221afb389cdc95286d608bd129b077b4becf263183f7a0
 
 name:           MachineLearning
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/MachineLearning#readme>
-homepage:       https://github.com/githubuser/MachineLearning#readme
-bug-reports:    https://github.com/githubuser/MachineLearning/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2019 Author name here
+description:    Please see the README on GitHub at <https://github.com/Nissen96/haskell-machine-learning#readme>
+homepage:       https://github.com/Nissen96/haskell-machine-learning#readme
+bug-reports:    https://github.com/Nissen96/haskell-machine-learning/issues
+author:         Alexander F. Nissen, Jacob V. M. Nielsen
+maintainer:     alexander@feldbech.dk
+copyright:      2019 - Alexander F. Nissen, Jacob V. M. Nielsen
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/MachineLearning
+  location: https://github.com/Nissen96/haskell-machine-learning
 
 library
   exposed-modules:

@@ -1,8 +1,6 @@
 
 ## CUSTOM
-titlepage.pdf
 *.o
-dist-newstyle/
 
 # Compiled class file
 *.class
